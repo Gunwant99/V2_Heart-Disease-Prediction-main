@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>MedCore | New Patient Visit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; background: #f1f5f9; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center shadow-sm">
+        <h1 class="text-xl font-bold text-blue-700 flex items-center gap-2">
+            <span>🏥</span> MedCore Pro
+        </h1>
+        <a href="/dashboard" class="text-sm text-slate-500 hover:text-blue-600">Cancel & Return</a>
+    </div>
+
+    <div class="max-w-3xl mx-auto mt-10">
+        <div class="flex justify-between mb-8 px-4">
+            <div class="step-dot font-bold text-blue-600">1. Demographics</div>
+            <div class="step-dot text-slate-400">2. Vitals</div>
+            <div class="step-dot text-slate-400">3. Clinical Tests</div>
+            <div class="step-dot text-slate-400">4. Review</div>
+        </div>
+
+        <form action="/new_visit" method="POST" id="medForm" class="bg-white p-8 rounded-xl shadow-lg border border-slate-100">
+            
+            <div class="form-step" id="step1">
+                <h2 class="text-2xl font-bold mb-1">Patient Demographics</h2>
+                <p class="text-slate-500 mb-6 text-sm">Enter basic patient identification.</p>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name</label>
+                        <input type="text" name="name" class="w-full p-3 border rounded-lg focus:ring-2 ring-blue-500 outline-none" placeholder="John Doe" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Age</label>
+                        <input type="number" name="age" class="w-full p-3 border rounded-lg" placeholder="45" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sex</label>
+                        <select name="sex" class="w-full p-3 border rounded-lg bg-white">
+                            <option value="1">Male</option>
+                            <option value="0">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button type="button" onclick="nextStep(2)" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700">Next: Vitals →</button>
+                </div>
+            </div>
+
+            <div class="form-step hidden" id="step2">
+                <h2 class="text-2xl font-bold mb-1">Vitals & Symptoms</h2>
+                <p class="text-slate-500 mb-6 text-sm">Record current vital signs.</p>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Resting BP (mmHg)</label>
+                        <input type="number" name="trestbps" class="w-full p-3 border rounded-lg" placeholder="120" required>
+                        <p class="text-[10px] text-slate-400 mt-1">Normal Range: 90-120</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Cholesterol (mg/dl)</label>
+                        <input type="number" name="chol" class="w-full p-3 border rounded-lg" placeholder="200" required>
+                        <p class="text-[10px] text-slate-400 mt-1">Warn if > 240</p>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Chest Pain Type</label>
+                        <select name="cp" class="w-full p-3 border rounded-lg bg-white">
+                            <option value="0">Typical Angina (Severe)</option>
+                            <option value="1">Atypical Angina</option>
+                            <option value="2">Non-anginal Pain</option>
+                            <option value="3">Asymptomatic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="nextStep(1)" class="text-slate-500 px-4">← Back</button>
+                    <button type="button" onclick="nextStep(3)" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700">Next: Labs →</button>
+                </div>
+            </div>
+
+            <div class="form-step hidden" id="step3">
+                <h2 class="text-2xl font-bold mb-1">Advanced Clinical</h2>
+                <p class="text-slate-500 mb-6 text-sm">ECG and Stress Test results.</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" name="thalach" placeholder="Max Heart Rate (e.g., 150)" class="w-full p-3 border rounded-lg" required>
+                    <input type="number" step="0.1" name="oldpeak" placeholder="ST Depression (e.g., 1.0)" class="w-full p-3 border rounded-lg" required>
+                    
+                    <select name="exang" class="p-3 border rounded-lg"><option value="0">Ex. Angina: No</option><option value="1">Yes</option></select>
+                    <select name="fbs" class="p-3 border rounded-lg"><option value="0">Fasting Sugar < 120</option><option value="1"> > 120</option></select>
+                    <select name="restecg" class="p-3 border rounded-lg"><option value="0">ECG: Normal</option><option value="1">Abnormal</option></select>
+                    <select name="slope" class="p-3 border rounded-lg"><option value="1">Slope: Flat</option><option value="2">Up</option></select>
+                    <select name="ca" class="p-3 border rounded-lg"><option value="0">Vessels: 0</option><option value="1">1</option></select>
+                    <select name="thal" class="p-3 border rounded-lg"><option value="2">Thal: Normal</option><option value="3">Reversible</option></select>
+                </div>
+
+                <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <label class="text-xs font-bold text-yellow-700 uppercase">⚠️ AI Sensitivity Calibration</label>
+                    <input type="range" name="sensitivity" min="10" max="90" value="50" class="w-full mt-2">
+                    <p class="text-[10px] text-yellow-600">Adjust threshold for detection sensitivity.</p>
+                </div>
+
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="nextStep(2)" class="text-slate-500 px-4">← Back</button>
+                    <button type="submit" class="bg-emerald-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-emerald-700">RUN DIAGNOSTICS</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        function nextStep(step) {
+            document.querySelectorAll('.form-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById('step' + step).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

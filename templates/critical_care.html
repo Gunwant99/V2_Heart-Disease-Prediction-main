@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ICU Critical Care | MedCore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>body { background: #f3f4f6; font-family: 'Inter', sans-serif; color: #1f2937; }</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <nav class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-4">
+            <a href="/dashboard" class="text-gray-500 hover:text-blue-600 transition font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Dashboard
+            </a>
+            <div class="h-6 w-px bg-gray-300"></div>
+            <h1 class="text-xl font-bold text-slate-800 flex items-center">
+                <div class="bg-red-100 text-red-600 p-2 rounded-full mr-3">
+                    <i class="fas fa-heart-pulse animate-pulse"></i>
+                </div>
+                Critical Care Unit
+            </h1>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="bg-gray-100 p-1 rounded-lg flex text-xs font-bold mr-4">
+                <button onclick="filterCards('all')" class="px-4 py-2 rounded-md hover:bg-white hover:shadow transition text-gray-600">All</button>
+                <button onclick="filterCards('Critical')" class="px-4 py-2 rounded-md hover:bg-white hover:shadow transition text-red-600">Critical</button>
+                <button onclick="filterCards('Observation')" class="px-4 py-2 rounded-md hover:bg-white hover:shadow transition text-amber-600">Observation</button>
+            </div>
+
+            <a href="/shift_handover" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg transition flex items-center text-xs">
+                <i class="fas fa-print mr-2"></i> Print Shift Handover
+            </a>
+        </div>
+    </nav>
+
+    <div class="p-8 max-w-[1600px] mx-auto w-full">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="mb-6 p-4 rounded-lg border-l-4 shadow-sm bg-white
+                            {{ 'border-emerald-500 text-emerald-700' if category=='success' else 'border-red-500 text-red-700' }}">
+                    <i class="fas fa-info-circle mr-2"></i> {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            
+            {% for case in cases %}
+            <div class="card-item bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition duration-300 relative overflow-hidden"
+                 data-status="{{ case.care_status.treatment_status if case.care_status else 'New' }}">
+                
+                <div class="h-1 w-full 
+                    {% if case.probability > 85 %}bg-red-600
+                    {% elif case.probability > 75 %}bg-orange-500
+                    {% else %}bg-yellow-500{% endif %}">
+                </div>
+
+                <div class="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
+                    <div class="flex gap-4">
+                        <div class="h-14 w-14 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center text-xl font-bold text-slate-700 shadow-sm">
+                            {{ case.patient.name[0] }}
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">{{ case.patient.name }}</h2>
+                            <p class="text-xs text-gray-500 font-medium">
+                                {{ case.patient.age }} yrs • {{ case.patient.sex }} • ID #{{ case.patient.id }}
+                            </p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="bg-white border border-gray-200 text-gray-500 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    <i class="far fa-clock mr-1"></i> {{ case.date.strftime('%H:%M') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-extrabold text-slate-800">{{ case.probability }}%</div>
+                        <div class="text-[10px] font-bold text-red-600 uppercase tracking-widest bg-red-50 px-2 py-1 rounded inline-block">Risk Level</div>
+                    </div>
+                </div>
+
+                <form action="/critical_care/update/{{ case.id }}" method="POST">
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
+                        
+                        <div class="md:col-span-4 space-y-3 border-r border-gray-100 pr-4">
+                            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Live Vitals</h3>
+                            
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">BP</span>
+                                <span class="font-bold text-slate-800">{{ case.trestbps }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Chol</span>
+                                <span class="font-bold text-slate-800">{{ case.chol }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">HR</span>
+                                <span class="font-bold text-slate-800">{{ case.thalach }}</span>
+                            </div>
+                            
+                            <a href="/report/{{ case.id }}" target="_blank" class="mt-4 block w-full text-center py-2 rounded bg-blue-50 text-blue-600 text-xs font-bold hover:bg-blue-100 transition">
+                                Open Full Report
+                            </a>
+                        </div>
+
+                        <div class="md:col-span-8 space-y-4">
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Condition</label>
+                                    <select name="condition_type" class="w-full bg-white border border-gray-300 rounded p-2 text-xs font-bold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none shadow-sm">
+                                        <option value="Assessment Pending" {% if not case.care_status or case.care_status.condition_type == 'Assessment Pending' %}selected{% endif %}>Assessment Pending</option>
+                                        <option value="Suspected Heart Attack" {% if case.care_status and case.care_status.condition_type == 'Suspected Heart Attack' %}selected{% endif %}>Suspected Heart Attack</option>
+                                        <option value="Acute Hypertension" {% if case.care_status and case.care_status.condition_type == 'Acute Hypertension' %}selected{% endif %}>Acute Hypertension</option>
+                                        <option value="Arrhythmia Risk" {% if case.care_status and case.care_status.condition_type == 'Arrhythmia Risk' %}selected{% endif %}>Arrhythmia Risk</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status</label>
+                                    <select name="treatment_status" class="w-full bg-white border border-gray-300 rounded p-2 text-xs font-bold text-slate-700 focus:border-blue-500 outline-none shadow-sm">
+                                        <option value="Not Started" {% if not case.care_status %}selected{% endif %}>Not Started</option>
+                                        <option value="Under Observation" {% if case.care_status and case.care_status.treatment_status == 'Under Observation' %}selected{% endif %}>Under Observation</option>
+                                        <option value="ICU Monitoring" {% if case.care_status and case.care_status.treatment_status == 'ICU Monitoring' %}selected{% endif %}>ICU Monitoring</option>
+                                        <option value="Medication Started" {% if case.care_status and case.care_status.treatment_status == 'Medication Started' %}selected{% endif %}>Medication Started</option>
+                                        <option value="Discharged / Stable" {% if case.care_status and case.care_status.treatment_status == 'Discharged / Stable' %}selected{% endif %}>Discharged / Stable</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Next Step</label>
+                                <input type="text" name="ongoing_process" 
+                                       value="{{ case.care_status.ongoing_process if case.care_status else '' }}" 
+                                       class="w-full bg-gray-50 border-b border-gray-300 p-2 text-xs text-slate-800 focus:border-blue-500 outline-none"
+                                       placeholder="e.g. ECG ordered, Waiting for labs...">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Doctor Notes</label>
+                                <textarea name="doctor_notes" rows="1" class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-xs text-slate-800 focus:border-blue-500 outline-none" placeholder="Add clinical notes...">{{ case.care_status.doctor_notes if case.care_status else '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-between items-center">
+                        
+                        <div class="flex gap-2">
+                            <button type="submit" name="action" value="mark_stable" class="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-1.5 rounded text-xs font-bold transition border border-emerald-200">
+                                <i class="fas fa-check mr-1"></i> Mark Stable
+                            </button>
+                            <button type="submit" name="action" value="escalate" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded text-xs font-bold transition border border-red-200">
+                                <i class="fas fa-bell mr-1"></i> Escalate
+                            </button>
+                        </div>
+
+                        <button type="submit" name="action" value="save" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-md font-bold text-xs shadow-md transition">
+                            Save Updates
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="col-span-1 xl:col-span-2 text-center py-24 bg-white rounded-xl border-2 border-dashed border-gray-200">
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-400">All Clear</h2>
+                <p class="text-gray-400 text-sm mt-1">No critical patients found. Good job.</p>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <script>
+        function filterCards(filter) {
+            const cards = document.querySelectorAll('.card-item');
+            cards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                
+                // Show All
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                } 
+                // Show Critical (New or Monitoring)
+                else if (filter === 'Critical') {
+                    if (status === 'ICU Monitoring' || status === 'Not Started' || status === 'New') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                } 
+                // Show Observation
+                else if (filter === 'Observation') {
+                    if (status === 'Under Observation' || status === 'Medication Started') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

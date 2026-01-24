@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login | MedCore Health</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hero-pattern {
+            background-image: url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.85);
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden">
+
+    <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 hero-pattern relative text-white">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-slate-900/80 z-0"></div>
+        
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-blue-600 text-2xl font-bold shadow-lg">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">MedCore</h1>
+                    <p class="text-blue-200 text-sm uppercase tracking-widest">Adishakti Heart Hospital</p>
+                </div>
+            </div>
+        </div>
+
+<div class="relative z-10 max-w-lg">
+            <div class="border-l-4 border-blue-400 pl-6 mb-6">
+                <h2 class="text-4xl font-bold leading-tight mb-4">"{{ quote.text }}"</h2>
+                <p class="text-lg text-blue-200 italic">- {{ quote.author }}</p>
+            </div>
+            <p class="text-slate-300 text-sm">MedCore empowers your clinical decisions with advanced AI diagnostics, ensuring every patient gets the precision care they deserve.</p>
+        </div>
+
+        <div class="relative z-10 flex gap-4 text-sm text-blue-200/60">
+            <span>© 2026 MedCore Health</span>
+            <span>•</span>
+            <span>Privacy Policy</span>
+            <span>•</span>
+            <span>System Status: <span class="text-emerald-400">Online</span></span>
+        </div>
+    </div>
+
+    <div class="w-full lg:w-1/2 bg-slate-50 flex items-center justify-center p-8">
+        <div class="w-full max-w-md bg-white p-10 rounded-2xl shadow-xl border border-slate-100">
+            
+            <div class="text-center mb-8">
+                <div class="inline-block p-3 rounded-full bg-blue-50 text-blue-600 text-2xl mb-4">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">Clinician Portal</h2>
+                <p class="text-slate-500 mt-2">Please authenticate to access patient records.</p>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Medical ID / Username</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3.5 text-slate-400"><i class="fas fa-id-card"></i></span>
+                        <input type="text" name="username" placeholder="doctor" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Secure Password</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3.5 text-slate-400"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" placeholder="admin123" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5">
+                    Access Portal <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="mt-6 p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg text-center flex items-center justify-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i> {{ messages[0] }}
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="mt-8 text-center border-t border-slate-100 pt-6">
+                <p class="text-xs text-slate-400">Authorized Personnel Only. Unauthorized access is a violation of hospital policy.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

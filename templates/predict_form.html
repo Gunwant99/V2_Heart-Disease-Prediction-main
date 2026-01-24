@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Run Diagnosis | MedCore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+        
+        <div class="bg-blue-600 p-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h1 class="text-xl font-bold text-white"><i class="fas fa-microscope mr-2"></i>AI Diagnostic Protocol</h1>
+                
+                <div class="hidden md:flex bg-blue-800/50 px-3 py-1 rounded-full border border-blue-400/30 items-center gap-2">
+                    <span class="text-[10px] text-blue-200 uppercase font-bold tracking-wider">Input Status:</span>
+                    <span id="quality-badge" class="text-[10px] font-bold text-emerald-300 flex items-center">
+                        <i class="fas fa-check-circle mr-1"></i> Ready
+                    </span>
+                </div>
+            </div>
+            <div class="text-sm bg-blue-700 px-3 py-1 rounded-full border border-blue-500">Patient: {{ p.name }}</div>
+        </div>
+
+        <form method="POST" class="p-8 space-y-6" oninput="validateForm()">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mb-4 space-y-2">
+                    {% for category, message in messages %}
+                    <div class="p-3 rounded bg-red-900/50 border border-red-500 text-red-200 text-sm font-bold flex items-center animate-pulse">
+                        <i class="fas fa-exclamation-triangle mr-3"></i> {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            <input type="hidden" name="age" value="{{ p.age }}">
+            <input type="hidden" name="sex" value="{{ p.sex }}">
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Chest Pain Type</label>
+                    <select name="cp" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none transition">
+                        <option value="0">Typical Angina</option>
+                        <option value="1">Atypical Angina</option>
+                        <option value="2">Non-anginal Pain</option>
+                        <option value="3">Asymptomatic</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Resting BP (mmHg)</label>
+                    <input type="number" name="trestbps" min="50" max="250" required 
+                           class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none transition" 
+                           placeholder="Range: 50-250" value="{{ form_data.trestbps if form_data else '' }}">
+                    <p class="text-[10px] text-slate-500 mt-1">Valid Range: 50 - 250</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Cholesterol (mg/dl)</label>
+                    <input type="number" name="chol" min="80" max="600" required 
+                           class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none transition" 
+                           placeholder="Range: 80-600" value="{{ form_data.chol if form_data else '' }}">
+                    <p class="text-[10px] text-slate-500 mt-1">Valid Range: 80 - 600</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fasting BS > 120</label>
+                    <select name="fbs" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none">
+                        <option value="0">False</option>
+                        <option value="1">True</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Resting ECG</label>
+                    <select name="restecg" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none">
+                        <option value="0">Normal</option>
+                        <option value="1">ST-T Abnormality</option>
+                        <option value="2">LV Hypertrophy</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Max Heart Rate</label>
+                    <input type="number" name="thalach" min="60" max="220" required 
+                           class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none transition" 
+                           placeholder="Range: 60-220" value="{{ form_data.thalach if form_data else '' }}">
+                    <p class="text-[10px] text-slate-500 mt-1">Valid Range: 60 - 220</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Exercise Angina</label>
+                    <select name="exang" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Oldpeak (ST Depr)</label>
+                    <input type="number" step="0.1" name="oldpeak" min="0" max="10" required 
+                           class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none transition" 
+                           placeholder="Range: 0.0-10.0" value="{{ form_data.oldpeak if form_data else '' }}">
+                    <p class="text-[10px] text-slate-500 mt-1">Valid Range: 0.0 - 10.0</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Slope</label>
+                    <select name="slope" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none">
+                        <option value="1">Flat</option>
+                        <option value="2">Upsloping</option>
+                        <option value="0">Downsloping</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Major Vessels (0-3)</label>
+                    <select name="ca" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Thal</label>
+                    <select name="thal" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-blue-500 outline-none">
+                        <option value="2">Normal</option>
+                        <option value="1">Fixed Defect</option>
+                        <option value="3">Reversable Defect</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-4 pt-6 border-t border-white/10">
+                <a href="/patient/{{ p.id }}" class="px-6 py-3 rounded-lg text-slate-400 hover:bg-slate-800 transition">Cancel</a>
+                <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg transition flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-calculator mr-2"></i> Run Analysis & Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="fixed bottom-5 right-5 flex gap-2 opacity-50 hover:opacity-100 transition">
+        <button onclick="fillHealthy()" class="bg-green-600 text-white text-xs px-3 py-1 rounded shadow hover:bg-green-500">Demo: Healthy</button>
+        <button onclick="fillSick()" class="bg-red-600 text-white text-xs px-3 py-1 rounded shadow hover:bg-red-500">Demo: High Risk</button>
+    </div>
+
+    <script>
+        // --- 1. LIVE VALIDATION LOGIC ---
+        function validateForm() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            const btn = document.getElementById('submit-btn');
+            const badge = document.getElementById('quality-badge');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                const val = parseFloat(input.value);
+                const min = parseFloat(input.min);
+                const max = parseFloat(input.max);
+
+                // Check constraints
+                if (input.value === '' || val < min || val > max) {
+                    isValid = false;
+                    // Error Styling
+                    input.classList.add('border-red-500', 'bg-red-900/20');
+                    input.classList.remove('border-slate-700', 'bg-slate-900');
+                } else {
+                    // Success Styling
+                    input.classList.remove('border-red-500', 'bg-red-900/20');
+                    input.classList.add('border-slate-700', 'bg-slate-900');
+                }
+            });
+
+            // Update Badge & Button
+            btn.disabled = !isValid;
+            if (isValid) {
+                badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Valid Clinical Input';
+                badge.className = "text-[10px] font-bold text-emerald-300 flex items-center";
+            } else {
+                badge.innerHTML = '<i class="fas fa-times-circle mr-1"></i> Invalid Input detected';
+                badge.className = "text-[10px] font-bold text-red-400 flex items-center animate-pulse";
+            }
+        }
+
+        // --- 2. DEMO DATA HELPERS ---
+        function fillHealthy() {
+            document.querySelector('[name="cp"]').value = "2"; 
+            document.querySelector('[name="trestbps"]').value = "110";
+            document.querySelector('[name="chol"]').value = "180";
+            document.querySelector('[name="fbs"]').value = "0";
+            document.querySelector('[name="restecg"]').value = "0";
+            document.querySelector('[name="thalach"]').value = "160";
+            document.querySelector('[name="exang"]').value = "0";
+            document.querySelector('[name="oldpeak"]').value = "0.0";
+            document.querySelector('[name="slope"]').value = "2"; 
+            document.querySelector('[name="ca"]').value = "0";
+            document.querySelector('[name="thal"]').value = "2"; 
+            validateForm(); // Run check immediately
+        }
+
+        function fillSick() {
+            document.querySelector('[name="cp"]').value = "0"; 
+            document.querySelector('[name="trestbps"]').value = "155";
+            document.querySelector('[name="chol"]').value = "300";
+            document.querySelector('[name="fbs"]').value = "1";
+            document.querySelector('[name="restecg"]').value = "1";
+            document.querySelector('[name="thalach"]').value = "105";
+            document.querySelector('[name="exang"]').value = "1";
+            document.querySelector('[name="oldpeak"]').value = "2.5";
+            document.querySelector('[name="slope"]').value = "1"; 
+            document.querySelector('[name="ca"]').value = "2";
+            document.querySelector('[name="thal"]').value = "3"; 
+            validateForm(); // Run check immediately
+        }
+
+        // Run on load to check if any pre-filled data is valid
+        window.onload = validateForm;
+    </script>
+
+</body>
+</html>

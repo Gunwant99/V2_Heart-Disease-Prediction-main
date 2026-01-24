@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Emergency Center | MedCore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>body { background: #fef2f2; font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="flex">
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col h-screen fixed">
+        <div class="h-20 flex items-center px-8 border-b border-slate-800">
+            <h1 class="text-xl font-bold text-white"><i class="fas fa-heartbeat text-blue-500 mr-2"></i>MedCore</h1>
+        </div>
+        <nav class="flex-1 py-6 space-y-1">
+            <a href="/dashboard" class="flex items-center px-6 py-3 hover:bg-slate-800"><i class="fas fa-arrow-left w-6"></i> Back to Dashboard</a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="p-3 bg-red-600 text-white rounded-full text-2xl shadow-lg shadow-red-500/30"><i class="fas fa-ambulance"></i></div>
+            <div>
+                <h1 class="text-3xl font-bold text-red-700">Critical Care Unit</h1>
+                <p class="text-red-500">Live monitoring of high-risk patients</p>
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            {% for case in cases %}
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-red-200 flex justify-between items-center animate-pulse">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800">{{ case.patient.name }}</h3>
+                    <p class="text-red-600 font-bold mt-1"><i class="fas fa-exclamation-triangle mr-2"></i>Risk Probability: {{ case.probability }}%</p>
+                    <p class="text-xs text-slate-500 mt-1">Detected: {{ case.date.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="/patient/{{ case.patient.id }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold transition">Profile</a>
+                    <a href="/report/{{ case.id }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition">View Report</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-red-100">
+                <i class="fas fa-check-circle text-6xl text-emerald-400 mb-4"></i>
+                <h2 class="text-2xl font-bold text-slate-600">No Critical Cases</h2>
+                <p class="text-slate-400">System is monitoring for high-risk patients. All clear.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

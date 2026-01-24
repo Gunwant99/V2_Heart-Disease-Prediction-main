@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pharmacy | MedCore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>body { background: #f8fafc; font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="flex">
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col h-screen fixed">
+        <div class="h-20 flex items-center px-8 border-b border-slate-800">
+            <h1 class="text-xl font-bold text-white"><i class="fas fa-heartbeat text-blue-500 mr-2"></i>MedCore</h1>
+        </div>
+        <nav class="flex-1 py-6 space-y-1">
+            <a href="/dashboard" class="flex items-center px-6 py-3 hover:bg-slate-800"><i class="fas fa-arrow-left w-6"></i> Back to Dashboard</a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-slate-800">Pharmacy & Prescriptions</h1>
+            <button onclick="document.getElementById('rxModal').classList.remove('hidden')" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-purple-700 shadow">
+                + Prescribe Medicine
+            </button>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded bg-yellow-100 text-yellow-800 border border-yellow-200">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for rx in prescriptions %}
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 {% if rx.status == 'Active' %}border-purple-500{% else %}border-slate-300 opacity-75{% endif %} hover:shadow-md transition">
+                <div class="flex justify-between mb-2">
+                    <h3 class="font-bold text-lg text-slate-800">{{ rx.medicine_name }}</h3>
+                    <span class="text-xs px-2 py-1 rounded font-bold {% if rx.status == 'Active' %}bg-purple-100 text-purple-600{% else %}bg-slate-100 text-slate-500{% endif %}">{{ rx.status }}</span>
+                </div>
+                <div class="text-sm text-slate-500 space-y-1 mb-4">
+                    <p><i class="fas fa-flask mr-2 w-4"></i> {{ rx.dosage }} • {{ rx.frequency }}</p>
+                    <p><i class="fas fa-clock mr-2 w-4"></i> {{ rx.duration }}</p>
+                    <p class="text-slate-600 italic">"{{ rx.instructions }}"</p>
+                </div>
+                
+                <div class="border-t border-slate-100 pt-3 flex justify-between items-center">
+                    <a href="/patient/{{ rx.patient_id }}" class="text-sm font-bold text-blue-600 hover:underline">{{ rx.patient.name }}</a>
+                    
+                    {% if rx.status == 'Active' %}
+                    <a href="/prescription/{{ rx.id }}/status/Stopped" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Stop Meds</a>
+                    {% else %}
+                    <form action="/prescription/{{ rx.id }}/delete" method="POST" onsubmit="return confirm('Delete record?');">
+                        <button class="text-xs text-slate-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <p class="text-slate-500 col-span-3 text-center py-10">No prescription records found.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+    <div id="rxModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <form action="/prescription/create" method="POST" class="bg-white p-8 rounded-xl shadow-2xl w-96">
+            <h2 class="text-xl font-bold mb-4">Prescribe Medicine</h2>
+            <select name="patient_id" class="w-full mb-3 p-2 border rounded" required>
+                {% for p in patients %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="med_name" placeholder="Medicine Name" class="w-full mb-3 p-2 border rounded" required>
+            <div class="flex gap-2 mb-3">
+                <input type="text" name="dosage" placeholder="Dose (10mg)" class="w-1/2 p-2 border rounded" required>
+                <input type="text" name="frequency" placeholder="Freq (Daily)" class="w-1/2 p-2 border rounded" required>
+            </div>
+            <input type="text" name="duration" placeholder="Duration (30 Days)" class="w-full mb-3 p-2 border rounded" required>
+            <input type="text" name="instructions" placeholder="Instructions (e.g. After food)" class="w-full mb-4 p-2 border rounded">
+            
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('rxModal').classList.add('hidden')" class="text-slate-500">Cancel</button>
+                <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded font-bold">Prescribe</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

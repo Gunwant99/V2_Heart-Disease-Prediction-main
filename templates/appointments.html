@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Appointments | MedCore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>body { background: #f8fafc; font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="flex">
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col h-screen fixed">
+        <div class="h-20 flex items-center px-8 border-b border-slate-800">
+            <h1 class="text-xl font-bold text-white"><i class="fas fa-heartbeat text-blue-500 mr-2"></i>MedCore</h1>
+        </div>
+        <nav class="flex-1 py-6 space-y-1">
+            <a href="/dashboard" class="flex items-center px-6 py-3 hover:bg-slate-800"><i class="fas fa-arrow-left w-6"></i> Back to Dashboard</a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-slate-800">Schedule Management</h1>
+            <button onclick="document.getElementById('apptModal').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 shadow">
+                + New Appointment
+            </button>
+        </div>
+
+        <div class="flex gap-4 mb-6">
+            <a href="/appointments?filter=all" class="px-4 py-2 rounded-lg text-sm font-bold {% if filter == 'all' %}bg-slate-800 text-white{% else %}bg-white text-slate-600{% endif %}">All</a>
+            <a href="/appointments?filter=today" class="px-4 py-2 rounded-lg text-sm font-bold {% if filter == 'today' %}bg-slate-800 text-white{% else %}bg-white text-slate-600{% endif %}">Today</a>
+            <a href="/appointments?filter=upcoming" class="px-4 py-2 rounded-lg text-sm font-bold {% if filter == 'upcoming' %}bg-slate-800 text-white{% else %}bg-white text-slate-600{% endif %}">Upcoming</a>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                    <tr>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Patient</th>
+                        <th class="px-6 py-4">Reason</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                    {% for apt in appointments %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-4 font-bold text-slate-700">{{ apt.date_time.strftime('%b %d, %H:%M') }}</td>
+                        <td class="px-6 py-4 text-blue-600 font-bold">{{ apt.patient.name }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ apt.reason }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-xs font-bold 
+                            {% if apt.status == 'Scheduled' %}bg-blue-100 text-blue-700{% elif apt.status == 'Completed' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                                {{ apt.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right flex justify-end gap-2">
+                            <a href="/appointment/{{ apt.id }}/status/Completed" class="text-green-600 hover:bg-green-50 p-2 rounded" title="Complete"><i class="fas fa-check"></i></a>
+                            <a href="/appointment/{{ apt.id }}/status/Cancelled" class="text-orange-500 hover:bg-orange-50 p-2 rounded" title="Cancel"><i class="fas fa-ban"></i></a>
+                            <form action="/appointment/{{ apt.id }}/delete" method="POST" onsubmit="return confirm('Delete this appointment?');" class="inline">
+                                <button class="text-red-600 hover:bg-red-50 p-2 rounded" title="Delete"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center py-8 text-slate-400">No appointments found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="apptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <form action="/appointment/create" method="POST" class="bg-white p-8 rounded-xl shadow-2xl w-96">
+            <h2 class="text-xl font-bold mb-4">New Appointment</h2>
+            <select name="patient_id" class="w-full mb-3 p-2 border rounded" required>
+                {% for p in patients %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="datetime-local" name="date" class="w-full mb-3 p-2 border rounded" required>
+            <input type="text" name="reason" placeholder="Reason for Visit" class="w-full mb-4 p-2 border rounded" required>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('apptModal').classList.add('hidden')" class="text-slate-500">Cancel</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded font-bold">Schedule</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
